@@ -16,7 +16,7 @@ jobs:
           echo "Checking backend health..."
           
           # Replace with your actual backend URL
-          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://your-backend-url.com' }}"
+          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://spaces-backend-xjhh.onrender.com/' }}"
           
           # Ping the health endpoint
           response=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/health")
@@ -31,14 +31,14 @@ jobs:
       - name: Get Health Details
         if: success()
         run: |
-          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://your-backend-url.com' }}"
+          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://spaces-backend-xjhh.onrender.com' }}"
           echo "Health endpoint response:"
           curl -s "$BACKEND_URL/health" | jq '.'
       
       - name: Check Cache Stats
         if: success()
         run: |
-          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://your-backend-url.com' }}"
+          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://spaces-backend-xjhh.onrender.com' }}"
           echo "Cache statistics:"
           curl -s "$BACKEND_URL/api/cache/stats" | jq '.'
       
