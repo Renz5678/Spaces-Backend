@@ -1,0 +1,50 @@
+name: Health Check Monitor
+
+on:
+  schedule:
+    # Run every 10 minutes
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check Backend Health
+        run: |
+          echo "Checking backend health..."
+          
+          # Replace with your actual backend URL
+          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://your-backend-url.com' }}"
+          
+          # Ping the health endpoint
+          response=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/health")
+          
+          if [ $response -eq 200 ]; then
+            echo "✅ Backend is healthy (HTTP $response)"
+          else
+            echo "❌ Backend health check failed (HTTP $response)"
+            exit 1
+          fi
+      
+      - name: Get Health Details
+        if: success()
+        run: |
+          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://your-backend-url.com' }}"
+          echo "Health endpoint response:"
+          curl -s "$BACKEND_URL/health" | jq '.'
+      
+      - name: Check Cache Stats
+        if: success()
+        run: |
+          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://your-backend-url.com' }}"
+          echo "Cache statistics:"
+          curl -s "$BACKEND_URL/api/cache/stats" | jq '.'
+      
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "🚨 Health check failed! Backend may be down."
+          echo "Timestamp: $(date -u)"
+          # Add notification logic here (Slack, Discord, email, etc.)
